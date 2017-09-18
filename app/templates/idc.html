@@ -1,0 +1,150 @@
+{% extends 'layout.html' %}
+{% block body %}
+<button type="button" class="add-btn-admin btn btn-primary btn-lg" data-toggle="modal" data-target="#add-idc-modal">
+  添加机房
+</button>
+<table id="idc-table" class="table table-striped table-bordered" width="100%" cellspacing="0">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>机房</th>
+                <th>区域</th>
+                <th>删除</th>
+                <th>修改</th>
+                <!-- <th>修改</th> -->
+            </tr>
+        </thead>
+        <tbody  id='idc-list'>
+        </tbody>
+    </table>
+
+
+
+{% endblock %}
+{% block js %}
+<!-- 添加 -->
+<div class="modal fade" id="add-idc-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">新增机房</h4>
+      </div>
+      <div class="modal-body">
+        <form id='add-form'>
+				  <input type="hidden" name='table_name' value='idc'>
+				  <div class="form-group">
+				    <label>机房名</label>
+				    <input type="text" name='name' class="form-control" id="exampleInputEmail1" >
+				  </div>
+				  <div class="form-group">
+				    <label for="exampleInputPassword1">机房区域</label>
+				    <input type="text" name='area' class="form-control" id="exampleInputPassword1" >
+				  </div>
+	    </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+        <button type="button" id='add-confirm' class="btn btn-primary">新增</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- 修改 -->
+<div class="modal fade" id="update-idc-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">新增机房</h4>
+      </div>
+      <div class="modal-body">
+        <form id='update-form'>
+				  <input type="hidden" name='table_name' value='idc'>
+				  <input type="hidden" name='id'>
+				  <div class="form-group">
+				    <label>机房名</label>
+				    <input type="text" name='name' class="form-control" id="exampleInputEmail1" >
+				  </div>
+				  <div class="form-group">
+				    <label for="exampleInputPassword1">机房区域</label>
+				    <input type="text" name='area' class="form-control" id="exampleInputPassword1" >
+				  </div>
+	    </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+        <button type="button" id='update-confirm' class="btn btn-primary">保存</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<script>
+//添加idc
+$('#add-confirm').off().on('click',function(){
+	var values = $('#add-form').serialize()
+	$.post('/addapi',values,function(res){
+		res = JSON.parse(res)
+		console.log(res)
+		if(res.code == 0){
+			$('#add-idc-modal').modal('hide')
+			$('#add-form')[0].reset()
+			swal('添加成功','','success')
+			// alert('添加成功')
+			getlist()
+		}else {
+			swal(res.msg,'','error')
+		}
+
+	})
+})
+//获取数据写入datable
+function getlist(){
+	$.getJSON('/listapi?table_name=idc',function(res_idc){
+		console.log(res_idc)
+		var html_str=''
+		$.each(res_idc,function(i,v){
+			html_str +='<tr>'
+			html_str +='<td>'+v[3]+'</td>'
+			html_str +='<td>'+v[1]+'</td>'
+			html_str +='<td>'+v[2]+'</td>'
+			html_str +="<td> <span data-name="+v[1]+" data-id="+v[0]+" class='del-idc glyphicon glyphicon-trash text-danger' aria-hidden='true'></span> </td>"
+			html_str +="<td> <span data-name="+v[1]+" data-id="+v[0]+ " data-area="+v[2]+ " class='update-idc glyphicon glyphicon-edit text-success' aria-hidden='true'></span> </td>"
+			html_str +='</tr>'
+		})
+		//调用layout函数
+		render_datatable('idc-table',html_str)
+})
+}
+getlist()
+$(document).on('click','.update-idc',function(){
+	$('#update-idc-modal').modal('show')
+	console.log($(this).data())
+	$.each($(this).data(),function(i,v){
+           $('#update-form').find("[name='"+i+"']").val(v)
+	})
+	$('#update-confirm').on('click',function(){
+		var args = $('#update-form').serialize()
+		console.log(args)
+		$.post('/update',args,function(res){
+			if(res =='ok'){
+				$('#update-idc-modal').modal('hide')
+				swal('','修改成功','success')
+				getlist()
+			}else{
+				swal('','修改失败','error')
+			}
+		})
+	})
+})
+//调用layout函数
+delete_table('.del-idc','idc')
+</script>
+{% endblock %}
+
+

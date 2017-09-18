@@ -1,0 +1,140 @@
+{% extends 'layout.html' %}
+{% block body %}
+<div id="main" style="width: 600px;height:400px;"></div>
+{% endblock %}
+{% block js%}
+<script src='/static/js/echarts.min.js'></script>
+<script>
+// 基于准备好的dom，初始化echarts实例
+   var myChart = echarts.init(document.getElementById('main'))
+   $.getJSON('/mem/meminfo',function(res){
+
+// 指定图表的配置项和数据
+option = {
+    title: {
+        text: '内存信息',
+        subtext: ''
+    },
+    tooltip: {
+        trigger: 'axis'
+    },
+    legend: {
+        data:['内存信息']
+    },
+    toolbox: {
+        show: true,
+        feature: {
+            dataZoom: {
+                yAxisIndex: 'none'
+            },
+            dataView: {readOnly: false},
+            magicType: {type: ['line', 'bar']},
+            restore: {},
+            saveAsImage: {}
+        }
+    },
+    xAxis:  {
+        type: 'category',
+        boundaryGap: false,
+        data: res['x']
+    },
+    yAxis: {
+        type: 'value',
+        axisLabel: {
+            formatter: '{value} MB'
+        }
+    },
+    series: [
+        {
+            name:'当前内存',
+            type:'line',
+            data:res['data'],
+
+        },
+
+    ]
+};
+// 使用刚指定的配置项和数据显示图表。
+        myChart.setOption(option);
+
+    var create_time =res['max_time']
+    setInterval(function(){
+        $.getJSON('/mem/meminfo?create_time='+create_time,function(add_res){
+            res['data']=res['data'].concat(add_res['data'])
+            res['x']=res['x'].concat(add_res['x'])
+            console.log(res['data'])
+            myChart.setOption({
+                xAxis: {data:res['x']},
+                series:[{data:res['data']}]
+            });
+            create_time = add_res['max_time']
+        })
+    },1000)
+
+
+
+
+
+})
+    </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{%endblock%}

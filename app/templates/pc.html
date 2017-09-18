@@ -1,0 +1,212 @@
+{% extends 'layout.html' %}
+{% block body %}
+<button type="button" class="add-btn-admin btn btn-primary btn-lg" data-toggle="modal" data-target="#add-pc-modal">
+  新增服务器
+</button>
+<table id="pc-table" class="table table-striped table-bordered" width="100%" cellspacing="0">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>IP</th>
+                <th>CPU</th>
+                <th>内存</th>
+                <th>硬盘</th>
+                <th>IDC</th>
+                <th>购买时间</th>
+                <th>备注</th>
+                <th>删除</th>
+                <th>更新</th>
+            </tr>
+        </thead>
+        <tbody  id='pc-list'>
+        </tbody>
+    </table>
+
+
+{% endblock %}
+{% block js %}
+
+<!-- Modal -->
+<div class="modal fade" id="add-pc-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">新增服务器</h4>
+      </div>
+      <div class="modal-body">
+        <form id='add-pc-form'>
+				  <input type="hidden" name='table_name' value='pc'>
+				  <div class="form-group">
+				    <label>IP</label>
+				    <input type="text" name='ip' class="form-control" >
+				  </div>
+				  <div class="form-group">
+				    <label>CPU</label>
+				    <input type="text" name='cpu' class="form-control" >
+				  </div>
+				  <div class="form-group">
+				    <label>内存</label>
+				    <input type="text" name='mem' class="form-control" >
+				  </div>
+				  <div class="form-group">
+				    <label>硬盘</label>
+				    <input type="text" name='disk' class="form-control" >
+				  </div>
+				  <div class="form-group">
+				    <label>IDC</label>
+					<select class="form-control" id='idc-select' name='idc'>
+					</select>
+				 </div>				  				 
+				 <div class="form-group">
+				    <label>购买时间</label>
+				    <input type="text" name='buy_date'  class="form-control input-append date form_datetime" >
+				  </div>				  				  
+				  <div class="form-group">
+				    <label >备注</label>
+				    <textarea class="form-control" name='comments' rows="3"></textarea>
+				  </div>
+	    </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+        <button type="button" id='add-pc-confirm' class="btn btn-primary">新增</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- update-modal -->
+<!-- Modal -->
+<div class="modal fade" id="update-pc-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">更新服务器</h4>
+      </div>
+      <div class="modal-body">
+        <form id='update-pc-form'>
+                  <input type="hidden" name='id'>
+				  <input type="hidden" name='table_name' value='pc'>
+				  <div class="form-group">
+				    <label>IP</label>
+				    <input type="text" name='ip' class="form-control" >
+				  </div>
+				  <div class="form-group">
+				    <label>CPU</label>
+				    <input type="text" name='cpu' class="form-control" >
+				  </div>
+				  <div class="form-group">
+				    <label>内存</label>
+				    <input type="text" name='mem' class="form-control" >
+				  </div>
+				  <div class="form-group">
+				    <label>硬盘</label>
+				    <input type="text" name='disk' class="form-control" >
+				  </div>
+				  <div class="form-group">
+				    <label>IDC</label>
+					<select class="form-control" id='update-idc-select' name='idc'>
+					</select>
+				 </div>				  				 
+				 <div class="form-group">
+				    <label>购买时间</label>
+				    <input type="text" name='buy_date'  class="form-control input-append date form_datetime" >
+				  </div>				  				  
+				  <div class="form-group">
+				    <label >备注</label>
+				    <textarea class="form-control" name='comments' rows="3"></textarea>
+				  </div>
+	    </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+        <button type="button" id='update-pc-confirm' class="btn btn-primary">更新</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+//获取idc数据
+function getidc(){
+	$.getJSON('/listapi?table_name=idc',function(res){
+		var	option_str=''
+		$.each(res,function(i,v){
+			option_str +='<option value='+v[0]+'>'+v[1]+'</option>'
+		})
+		$('#idc-select,#update-idc-select').html(option_str)
+	})
+}
+getidc()
+//获取数据写入datable
+function getlist(){
+	$.getJSON('/listapi?table_name=pc',function(res_pc){
+		console.log(res_pc)
+		var html_str=''
+		$.each(res_pc,function(i,v){
+			html_str +='<tr>'
+			html_str +='<td>'+v[8]+'</td>'
+			html_str +='<td>'+v[1]+'</td>'
+			html_str +='<td>'+v[2]+'</td>'
+			html_str +='<td>'+v[3]+'</td>'
+			html_str +='<td>'+v[4]+'</td>'
+			html_str +='<td>'+$("#update-idc-select").find("option[value="+v[5]+"]").text()+'</td>'
+			console.log($("#update-idc-select").find("option[value="+v[5]+"]").text())
+			html_str +='<td>'+v[6]+'</td>'
+			html_str +='<td>'+v[7]+'</td>'
+			html_str +="<td> <span data-name="+v[1]+" data-id="+v[0]+" class='del-pc glyphicon glyphicon-trash text-danger' aria-hidden='true'></span> </td>"
+			html_str +="<td> <span data-ip="+v[1]+" data-id="+v[0]+" data-cpu="+v[2]+" data-mem="+v[3]+" data-disk="+v[4]+" data-idc="+v[5]+" data-buy_date="+v[6]+" data-comments="+v[7]+" class='update-pc glyphicon glyphicon-edit text-success' aria-hidden='true'></span> </td>"
+			html_str +='</tr>'
+		})
+		//调用layout函数
+		render_datatable('pc-table',html_str)
+		console.log(html_str)
+})
+}
+getlist()
+//添加服务器
+$('#add-pc-confirm').on('click',function(){
+	var values = $('#add-pc-form').serialize()
+	console.log(values)
+	$.post('/addapi',values,function(res){
+		res=JSON.parse(res)
+		if(res.code=='0'){
+			$('#add-pc-modal').modal('hide')
+			$('#add-pc-form')[0].reset()
+			swal('添加成功','','success')
+			getlist()
+		}else {
+			swal(res.msg,'','error')
+		}
+	})
+})
+$(".form_datetime").datetimepicker({
+    startView:2,
+    minView:2,
+    format: "yyyy-mm-dd"
+})
+//调用layout函数
+delete_table('.del-pc','pc')
+// 修改界面数据初始化
+$(document).on('click','.update-pc',function(){
+	$('#update-pc-modal').modal('show')
+   $.each($(this).data(),function(i,v){
+   	console.log(i,'xxx',v)
+   	$('#update-pc-form').find('[name="'+i+'"]').val(v)
+   })
+})
+$('#update-pc-confirm').on('click',function(){
+	var values =$('#update-pc-form').serialize()
+	$.post('/update',values,function(res){
+		if(res=='ok'){
+			$('#update-pc-modal').modal('hide')
+			swal('修改成功','','success')
+			getlist()
+		}else {
+			swal('修改失败','','error')
+		}
+	})
+})
+</script>
+{% endblock %}       
+
