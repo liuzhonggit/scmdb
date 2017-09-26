@@ -73,18 +73,20 @@
     <script src="./static/js/bootstrap.min.js"></script>
     <script src="./static/js/sweetalert.min.js"></script>
     <script>
-    // $('#login-form').on('submit',function(){
-    //   var values = $(this).serialize()
-    //   $.post('login',values,function(res){
-    //     var res=JSON.parse(res)
-    //     if(res.code=='0'){
-    //       localStorage.token=res.access_token
-    //     }else{
-    //       swal('','登录失败','error')
-    //     }
-    //   })
-    //   return false
-    // })
+    $('#login-form').on('submit',function(){
+      var values = $(this).serialize()
+      console.log(values)
+      $.post('/login',values,function(res){
+        var res=JSON.parse(res)
+        console.log(res)
+        if(res.code=='1'){
+          swal('','登录失败','error')
+        }else {
+          $(#login-form).submit()
+        }
+      })
+      return false
+    })
 
 
     </script>

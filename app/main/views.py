@@ -1,4 +1,4 @@
-# /u
+#! /bin/env python
 # conding:utf-8
 from flask import request,redirect,render_template,session
 # from flask_sqlalchemy import SQLAlchemy
@@ -48,9 +48,11 @@ def login():
 			# return json.dumps({'code':0,'access_token':tokenutil.create_token(res[0][1],res[0][3])})
 			session['user']=user
 			return redirect('/pc')
+			app.logger.info('login success')
 		else:
-			# return json.dumps({'code':1})
-			return 'login error'
+			return json.dumps({'code':1})
+			# return 'falied'
+			app.logger.error('login failed. Please check your user or password!')
 @app.route('/logout',methods=['GET','POST'])
 def logout():
 	del session['user']
